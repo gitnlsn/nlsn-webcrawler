@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model BaseUrl {
+  id    String @id @default(uuid())
+  value String @unique
+
+  createdAt DateTime @default(now())
+
+  paths       UrlPath[]
+  inspections BaseUrlInspection[]
+}
+
+model BaseUrlInspection {
+  id          String   @id @default(uuid())
+  inspectedAt DateTime @default(now())
+
+  baseUrl   BaseUrl @relation(fields: [baseUrlId], references: [id])
+  baseUrlId String
+}
+
+model UrlPath {
+  id    String @id @default(uuid())
+  value String @unique
+
+  fileUrls FileUrl[]
+
+  urlPathInspection UrlPathInspection[]
+
+  baseUrl   BaseUrl @relation(fields: [baseUrlId], references: [id])
+  baseUrlId String
+}
+
+model UrlPathInspection {
+  id          String   @id @default(uuid())
+  inspectedAt DateTime @default(now())
+
+  urlPath   UrlPath @relation(fields: [urlPathId], references: [id])
+  urlPathId String
+}
+
+model FileUrl {
+  id    String @id @default(uuid())
+  value String @unique
+
+  urlPath   UrlPath @relation(fields: [urlPathId], references: [id])
+  urlPathId String
+}
