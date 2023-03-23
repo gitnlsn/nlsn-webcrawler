@@ -1,4 +1,4 @@
-import { PuppeteerCrawler } from "../crawlers/PuppeteerCrawler"
+import { PuppeteerCrawler } from "../crawlers/PuppeteerCrawler/PuppeteerCrawler"
 import { WebCrawlerRepository } from "../repository/WebCrawlerRepository"
 import { getBaseUrl } from "../utils/getBaseUrl"
 

@@ -1,20 +1,17 @@
 import { AxiosInstance } from "axios"
-import { Browser } from "puppeteer"
-import { ArrayUtils } from "../utils/ArrayUtils"
+import { Browser, Page } from "puppeteer"
+import { ArrayUtils } from "../../utils/ArrayUtils"
 import {
   getContentType,
   getContentTypeFromRecord,
-} from "../utils/getContentType"
-import { getUrlOrigin } from "../utils/getUrlOrigin"
-import { isAbsoluteUrlPath } from "../utils/UrlRegex"
-import { CrawledData } from "./CrawledData.interface"
-import { Crawler } from "./Crawler.interface"
+} from "../../utils/getContentType"
+import { getUrlOrigin } from "../../utils/getUrlOrigin"
+import { isAbsoluteUrlPath } from "../../utils/UrlRegex"
+import { CrawledData } from "../CrawledData.interface"
+import { Crawler } from "../Crawler.interface"
 
 export class PuppeteerCrawler implements Crawler {
-  constructor(
-    private readonly browser: Browser,
-    private readonly axiosInstance: AxiosInstance
-  ) {}
+  constructor(private readonly browser: Browser) {}
 
   async crawlUrlPath(urlPath: string): Promise<CrawledData> {
     const page = await this.browser.newPage()
@@ -22,7 +19,7 @@ export class PuppeteerCrawler implements Crawler {
     const response = await page.goto(urlPath)
 
     if (!response) {
-      throw new Error("Expected have reached the page")
+      throw new Error("Expected response to exist")
     }
 
     const contentType = getContentTypeFromRecord(response.headers())
@@ -50,18 +47,33 @@ export class PuppeteerCrawler implements Crawler {
     anchorHrefs.forEach((link) => {
       const path = link
       const absolutePath = isAbsoluteUrlPath(path) ? path : `${origin}${path}`
+      let anchorNewPage: Page
 
-      const testingLinkPromise = this.axiosInstance
-        .get(absolutePath)
-        .then((testingLinkRequest) => {
-          const testingLinkUrl = testingLinkRequest.request.res.responseUrl
-          if (getContentType(testingLinkRequest.headers).includes("image")) {
+      const testingLinkPromise = this.browser
+        .newPage()
+        .then((page) => {
+          anchorNewPage = page
+          return page.goto(absolutePath)
+        })
+        .then((response) => {
+          if (!response) {
+            throw new Error("Expected response to exist")
+          }
+
+          const anchorContentType = getContentTypeFromRecord(response.headers())
+          if (!anchorContentType) {
+            throw new Error("Expected content-type to exist")
+          }
+
+          const testingLinkUrl = response.url()
+          if (anchorContentType.includes("image")) {
             imageLinks.push(testingLinkUrl)
           } else {
             anchorLinks.push(testingLinkUrl)
           }
         })
         .catch(console.error)
+        .finally(() => anchorNewPage.close())
 
       asyncTasks.push(testingLinkPromise)
     })

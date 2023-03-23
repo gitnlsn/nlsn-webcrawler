@@ -1,16 +1,13 @@
-import axios, { AxiosInstance } from "axios"
 import puppeteer, { Browser } from "puppeteer"
 import { PuppeteerCrawler } from "./PuppeteerCrawler"
 
 describe("PuppeteerCrawler", () => {
   let browser: Browser
-  let axiosInstance: AxiosInstance
   let puppeteerCrawler: PuppeteerCrawler
 
   beforeAll(async () => {
     browser = await puppeteer.launch()
-    axiosInstance = axios.create()
-    puppeteerCrawler = new PuppeteerCrawler(browser, axiosInstance)
+    puppeteerCrawler = new PuppeteerCrawler(browser)
   })
 
   afterAll(async () => {
@@ -23,5 +20,5 @@ describe("PuppeteerCrawler", () => {
     )
 
     expect(crawledData.pageUrl).toBe("https://www.google.com/")
-  })
+  }, 60000)
 })

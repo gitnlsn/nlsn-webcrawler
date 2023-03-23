@@ -1,12 +1,12 @@
 import { AxiosInstance } from "axios"
 import { JSDOM } from "jsdom"
 
-import { CrawledData } from "./CrawledData.interface"
-import { Crawler } from "./Crawler.interface"
-import { isAbsoluteUrlPath } from "../utils/UrlRegex"
-import { getUrlOrigin } from "../utils/getUrlOrigin"
-import { getContentType } from "../utils/getContentType"
-import { ArrayUtils } from "../utils/ArrayUtils"
+import { CrawledData } from "../CrawledData.interface"
+import { Crawler } from "../Crawler.interface"
+import { isAbsoluteUrlPath } from "../../utils/UrlRegex"
+import { getUrlOrigin } from "../../utils/getUrlOrigin"
+import { getContentType } from "../../utils/getContentType"
+import { ArrayUtils } from "../../utils/ArrayUtils"
 
 export class AxiosCrawler implements Crawler {
   constructor(private readonly axiosInstance: AxiosInstance) {}
