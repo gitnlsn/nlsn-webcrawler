@@ -1,6 +1,7 @@
 node_modules
 out
 dist
+coverage
 
 .env
 yarn-error.log

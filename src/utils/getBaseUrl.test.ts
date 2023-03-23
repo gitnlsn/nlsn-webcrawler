@@ -1,4 +1,3 @@
-import { describe, it, expect } from "vitest"
 import { getBaseUrl } from "./getBaseUrl"
 
 describe("getBaseUrl", () => {

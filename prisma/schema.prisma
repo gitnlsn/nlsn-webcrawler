@@ -34,7 +34,7 @@ model UrlPath {
 
   fileUrls FileUrl[]
 
-  urlPathInspection UrlPathInspection[]
+  urlPathInspections UrlPathInspection[]
 
   baseUrl   BaseUrl @relation(fields: [baseUrlId], references: [id])
   baseUrlId String

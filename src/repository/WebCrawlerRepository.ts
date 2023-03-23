@@ -17,7 +17,7 @@ export class WebCrawlerRepository {
         where: { value: { in: urls } },
       })
 
-      return transaction.baseUrl.createMany({
+      await transaction.baseUrl.createMany({
         data: urls
           .filter(
             (url) =>
@@ -28,6 +28,12 @@ export class WebCrawlerRepository {
           .map((url) => ({
             value: url,
           })),
+      })
+
+      return transaction.baseUrl.findMany({
+        where: {
+          value: { in: urls },
+        },
       })
     })
   }
@@ -41,7 +47,7 @@ export class WebCrawlerRepository {
     })
   }
 
-  async getPendingBaseUrls() {
+  async getPendingBaseUrls(limit = 20) {
     const urls = await this.prisma.baseUrl.findMany({
       orderBy: {
         inspections: {
@@ -55,7 +61,7 @@ export class WebCrawlerRepository {
           },
         },
       },
-      take: 20,
+      take: limit,
     })
 
     // Prioritizes base urls based on previous inspections and createdAt
@@ -90,7 +96,7 @@ export class WebCrawlerRepository {
             })),
           },
         },
-        urlPathInspection: {
+        urlPathInspections: {
           create: {},
         },
       },
@@ -103,12 +109,13 @@ export class WebCrawlerRepository {
             })),
           },
         },
-        urlPathInspection: {
+        urlPathInspections: {
           create: {},
         },
       },
       where: { value: urlPath },
       include: {
+        urlPathInspections: true,
         baseUrl: true,
         fileUrls: true,
       },
@@ -121,7 +128,7 @@ export class WebCrawlerRepository {
         where: { value: { in: urlPaths } },
       })
 
-      return transaction.urlPath.createMany({
+      await transaction.urlPath.createMany({
         data: urlPaths
           .filter(
             (url) =>
@@ -133,6 +140,10 @@ export class WebCrawlerRepository {
             value: url,
             baseUrlId,
           })),
+      })
+
+      return transaction.urlPath.findMany({
+        where: { value: { in: urlPaths } },
       })
     })
   }

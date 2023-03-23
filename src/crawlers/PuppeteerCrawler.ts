@@ -1,8 +1,9 @@
 import { Browser } from "puppeteer"
 import { ArrayUtils } from "../utils/ArrayUtils"
 import { CrawledData } from "./CrawledData.interface"
+import { Crawler } from "./Crawler.interface"
 
-export class PuppeteerCrawler {
+export class PuppeteerCrawler implements Crawler {
   constructor(private readonly browser: Browser) {}
 
   async crawlUrlPath(urlPath: string): Promise<CrawledData> {
