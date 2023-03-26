@@ -4,7 +4,7 @@ import puppeteer, { Browser } from "puppeteer"
 import { AxiosCrawler } from "../crawlers/AxiosCrawler/AxiosCrawler"
 import { PuppeteerCrawler } from "../crawlers/PuppeteerCrawler/PuppeteerCrawler"
 import { WebCrawlerRepository } from "../repository/WebCrawlerRepository"
-import { CrawlBaseUrlService } from "../services/CrawlBaseUrlService"
+import { BaseUrlCrawlService } from "../services/executors/BaseUrlCrawlService"
 
 export class MainModule {
   private prismaClient: PrismaClient | undefined
@@ -16,7 +16,7 @@ export class MainModule {
   private browser: Browser | undefined
   private puppeteerCrawler: PuppeteerCrawler | undefined
 
-  private CrawlBaseUrlService: CrawlBaseUrlService | undefined
+  private CrawlBaseUrlService: BaseUrlCrawlService | undefined
 
   async init() {
     this.prismaClient = new PrismaClient()
@@ -28,7 +28,7 @@ export class MainModule {
     this.browser = await puppeteer.launch()
     this.puppeteerCrawler = new PuppeteerCrawler(this.browser)
 
-    this.CrawlBaseUrlService = new CrawlBaseUrlService(
+    this.CrawlBaseUrlService = new BaseUrlCrawlService(
       this.webCrawlerRepository,
       this.puppeteerCrawler
     )

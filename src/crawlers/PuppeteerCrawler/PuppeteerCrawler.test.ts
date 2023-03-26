@@ -1,7 +1,10 @@
 import puppeteer, { Browser } from "puppeteer"
 import { PuppeteerCrawler } from "./PuppeteerCrawler"
 
-describe("PuppeteerCrawler", () => {
+/**
+ * Skipped because it depends on external services.
+ */
+describe.skip("PuppeteerCrawler", () => {
   let browser: Browser
   let puppeteerCrawler: PuppeteerCrawler
 

@@ -1,7 +1,10 @@
 import axios, { AxiosInstance } from "axios"
 import { AxiosCrawler } from "./AxiosCrawler"
 
-describe("AxiosCrawler", () => {
+/**
+ * Skipped because it depends on external services.
+ */
+describe.skip("AxiosCrawler", () => {
   let axiosInstance: AxiosInstance
   let axiosCrawler: AxiosCrawler
 

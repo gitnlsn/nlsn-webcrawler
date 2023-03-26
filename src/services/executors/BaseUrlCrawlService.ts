@@ -1,14 +1,18 @@
-import { PuppeteerCrawler } from "../crawlers/PuppeteerCrawler/PuppeteerCrawler"
-import { WebCrawlerRepository } from "../repository/WebCrawlerRepository"
-import { getBaseUrl } from "../utils/getBaseUrl"
+import { PuppeteerCrawler } from "../../crawlers/PuppeteerCrawler/PuppeteerCrawler"
+import { WebCrawlerRepository } from "../../repository/WebCrawlerRepository"
+import { getBaseUrl } from "../../utils/getBaseUrl"
+import {
+  PendingBaseUrlCrawlTask,
+  PendingBaseUrlCrawlTaskHandler,
+} from "../interfaces/PendingBaseUrlCrawlTask.interface"
 
-export class CrawlBaseUrlService {
+export class BaseUrlCrawlService implements PendingBaseUrlCrawlTaskHandler {
   constructor(
     private readonly prisma: WebCrawlerRepository,
     private readonly crawler: PuppeteerCrawler
   ) {}
 
-  async run(baseUrlId: string) {
+  async run({ baseUrlId }: PendingBaseUrlCrawlTask) {
     const baseUrl = await this.prisma.getBaseUrlById(baseUrlId)
 
     if (baseUrl === null) {

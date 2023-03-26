@@ -12,7 +12,7 @@ cleanup() {
 }
 
 test() {
-    npx jest --runInBand --coverage src
+    npx jest src --runInBand
 }
 
 trap cleanup EXIT
