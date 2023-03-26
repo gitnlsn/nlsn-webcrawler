@@ -1,13 +1,12 @@
 import { Redis } from "ioredis"
+import { bullRedisUlr } from "../config/envVars"
 import { BullQueueFactory } from "./QueueFactory"
-
-const redisUlr = String(process.env.BULL_REDIS_URL)
 
 describe("QueueFactory", () => {
   let redis: Redis
 
   beforeAll(() => {
-    redis = new Redis(redisUlr)
+    redis = new Redis(bullRedisUlr)
   })
 
   afterEach(async () => {

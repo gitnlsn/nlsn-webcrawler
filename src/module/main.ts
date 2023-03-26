@@ -1,36 +1,82 @@
 import { PrismaClient } from "@prisma/client"
-import axios, { AxiosInstance } from "axios"
+import { Queue } from "bull"
 import puppeteer, { Browser } from "puppeteer"
-import { AxiosCrawler } from "../crawlers/AxiosCrawler/AxiosCrawler"
+import { BullQueueFactory } from "../bull/QueueFactory"
 import { PuppeteerCrawler } from "../crawlers/PuppeteerCrawler/PuppeteerCrawler"
 import { WebCrawlerRepository } from "../repository/WebCrawlerRepository"
+import { SimplePendingBaseUrlProvider } from "../services/adapters/SimplePendingBaseUrlProvider"
+import { CronScheduler } from "../services/bullQueueIntegrations/CronScheduler"
+import { PendingBaseUrlCrawlBullTaskIntegration } from "../services/bullQueueIntegrations/PendingBaseUrlCrawlBullTaskIntegration"
 import { BaseUrlCrawlService } from "../services/executors/BaseUrlCrawlService"
+import { PendingBaseUrlCrawlTask } from "../services/interfaces/PendingBaseUrlCrawlTask.interface"
 
 export class MainModule {
-  private prismaClient: PrismaClient | undefined
-  private webCrawlerRepository: WebCrawlerRepository | undefined
+  constructor(
+    private readonly pendingBaseUrlCrawlQueue: Queue<PendingBaseUrlCrawlTask>,
+    private readonly cronScheduleCrawlQueue: Queue<void>,
 
-  private axiosInstance: AxiosInstance | undefined
-  private AxiosCrawler: AxiosCrawler | undefined
+    private readonly prismaClient: PrismaClient,
+    private readonly webCrawlerRepository: WebCrawlerRepository,
 
-  private browser: Browser | undefined
-  private puppeteerCrawler: PuppeteerCrawler | undefined
+    private readonly browser: Browser,
+    private readonly puppeteerCrawler: PuppeteerCrawler,
 
-  private CrawlBaseUrlService: BaseUrlCrawlService | undefined
+    private readonly baseUrlCrawlService: BaseUrlCrawlService,
 
-  async init() {
-    this.prismaClient = new PrismaClient()
-    this.webCrawlerRepository = new WebCrawlerRepository(this.prismaClient)
+    private readonly pendingBaseUrlCrawlBullTaskIntegration: PendingBaseUrlCrawlBullTaskIntegration,
+    private readonly cronScheduler: CronScheduler
+  ) {}
 
-    this.axiosInstance = axios.create()
-    this.AxiosCrawler = new AxiosCrawler(this.axiosInstance)
+  static async create() {
+    const pendingBaseUrlCrawlQueue = BullQueueFactory.baseUrlQueue()
+    const cronScheduleQueue = BullQueueFactory.cronScheduleQueue()
 
-    this.browser = await puppeteer.launch()
-    this.puppeteerCrawler = new PuppeteerCrawler(this.browser)
+    const prismaClient = new PrismaClient()
+    const webCrawlerRepository = new WebCrawlerRepository(prismaClient)
 
-    this.CrawlBaseUrlService = new BaseUrlCrawlService(
-      this.webCrawlerRepository,
-      this.puppeteerCrawler
+    const browser = await puppeteer.launch()
+    const puppeteerCrawler = new PuppeteerCrawler(browser)
+
+    const baseUrlCrawlService = new BaseUrlCrawlService(
+      webCrawlerRepository,
+      puppeteerCrawler
     )
+
+    const simplePendingUrlProvider = new SimplePendingBaseUrlProvider(
+      webCrawlerRepository
+    )
+
+    const pendingBaseUrlCrawlBullTaskIntegration =
+      new PendingBaseUrlCrawlBullTaskIntegration(
+        pendingBaseUrlCrawlQueue,
+        baseUrlCrawlService,
+        simplePendingUrlProvider
+      )
+
+    const cronScheduler = new CronScheduler(
+      cronScheduleQueue,
+      "* * * * *",
+      () => pendingBaseUrlCrawlBullTaskIntegration.schedule()
+    )
+
+    return new MainModule(
+      pendingBaseUrlCrawlQueue,
+      cronScheduleQueue,
+
+      prismaClient,
+      webCrawlerRepository,
+
+      browser,
+      puppeteerCrawler,
+
+      baseUrlCrawlService,
+
+      pendingBaseUrlCrawlBullTaskIntegration,
+      cronScheduler
+    )
+  }
+
+  async scheduleCronJobs() {
+    return this.cronScheduler.schedule()
   }
 }

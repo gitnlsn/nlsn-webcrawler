@@ -1,14 +1,13 @@
 import { Queue } from "bull"
 import { Redis } from "ioredis"
 import { BullQueueFactory } from "../../bull/QueueFactory"
+import { bullRedisUlr } from "../../config/envVars"
 import {
   PendingBaseUrlCrawlTask,
   PendingBaseUrlCrawlTaskHandler,
   PendingBaseUrlProvider,
 } from "../interfaces/PendingBaseUrlCrawlTask.interface"
 import { PendingBaseUrlCrawlBullTaskIntegration } from "./PendingBaseUrlCrawlBullTaskIntegration"
-
-const redisUrl = String(process.env.BULL_REDIS_URL)
 
 class TestingTaskHandler implements PendingBaseUrlCrawlTaskHandler {
   run = jest.fn()
@@ -27,7 +26,7 @@ describe("BaseUrlCrawl Schedule and Consumption", () => {
   let bullTaskIntegration: PendingBaseUrlCrawlBullTaskIntegration
 
   beforeAll(() => {
-    redis = new Redis(redisUrl)
+    redis = new Redis(bullRedisUlr)
     queue = BullQueueFactory.queue<PendingBaseUrlCrawlTask>("testing queue")
   })
 

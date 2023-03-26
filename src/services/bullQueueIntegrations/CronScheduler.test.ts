@@ -1,8 +1,7 @@
 import { Redis } from "ioredis"
 import { BullQueueFactory } from "../../bull/QueueFactory"
+import { bullRedisUlr } from "../../config/envVars"
 import { CronScheduler } from "./CronScheduler"
-
-const redisUrl = String(process.env.BULL_REDIS_URL)
 
 /**
  * Test is passing. Skipped because its hard to mock cron timer.
@@ -11,7 +10,7 @@ describe.skip("CronScheduler", () => {
   let redis: Redis
 
   beforeAll(() => {
-    redis = new Redis(redisUrl)
+    redis = new Redis(bullRedisUlr)
   })
 
   afterEach(async () => {
@@ -32,7 +31,7 @@ describe.skip("CronScheduler", () => {
 
     const queue = BullQueueFactory.queue("testing queue")
 
-    const cronScheduler = new CronScheduler(queue, callback)
+    const cronScheduler = new CronScheduler(queue, "* * * * *", callback)
 
     cronScheduler.setupConsumer()
     await cronScheduler.schedule()

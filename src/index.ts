@@ -1,8 +1,3 @@
-import { MainModule } from "./module/main"
+import { handleCommandLine } from "./commandLine";
 
-new MainModule()
-  .init()
-  .then(() => {
-    console.log("Application started")
-  })
-  .catch(console.error)
+handleCommandLine()

@@ -1,9 +1,10 @@
 import { Job, Queue } from "bull"
 import { BullQueueIntegration } from "../interfaces/BullQueueIntegration.interface"
 
-export class CronScheduler<T> implements BullQueueIntegration {
+export class CronScheduler<T = unknown> implements BullQueueIntegration {
   constructor(
     private readonly queue: Queue,
+    private readonly cronRule: string,
     private readonly callback: () => Promise<T>
   ) {}
 
@@ -14,11 +15,6 @@ export class CronScheduler<T> implements BullQueueIntegration {
   }
 
   schedule: () => Promise<Job<any> | Job<any>[] | undefined> = () => {
-    return this.queue.add(
-      {},
-      {
-        repeat: { cron: "* * * * *" },
-      }
-    )
+    return this.queue.add({}, { repeat: { cron: this.cronRule } })
   }
 }
